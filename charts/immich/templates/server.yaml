@@ -46,8 +46,8 @@ serviceMonitor:
         scheme: http
 
 probes:
-  liveness: &probes
-    enabled: true
+  liveness:
+    {{- if .Values.server.probes.liveness.enabled }}
     custom: true
     spec:
       httpGet:
@@ -57,9 +57,21 @@ probes:
       periodSeconds: 10
       timeoutSeconds: 1
       failureThreshold: 3
-  readiness: *probes
+    {{- end }}
+  readiness:
+    {{- if .Values.server.probes.readiness.enabled }}
+    custom: true
+    spec:
+      httpGet:
+        path: /api/server/ping
+        port: http
+      initialDelaySeconds: 0
+      periodSeconds: 10
+      timeoutSeconds: 1
+      failureThreshold: 3
+    {{- end }}
   startup:
-    enabled: true
+    {{- if .Values.server.probes.startup.enabled }}
     custom: true
     spec:
       httpGet:
@@ -69,6 +81,7 @@ probes:
       periodSeconds: 10
       timeoutSeconds: 1
       failureThreshold: 30
+    {{- end }}
 
 persistence:
 {{- if .Values.immich.configuration }}
