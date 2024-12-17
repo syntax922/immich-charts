@@ -46,7 +46,7 @@ serviceMonitor:
 
 probes:
   liveness:
-    enabled: {{ .Values.controllers.erver.probes.liveness.enabled | default true }}
+    enabled: {{ .Values.controllers.server.probes.liveness.enabled | default true }}
     custom: true
     spec:
       httpGet:
