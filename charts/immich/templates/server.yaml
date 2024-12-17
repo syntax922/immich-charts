@@ -98,10 +98,11 @@ persistence:
 {{- $_ = include "immich.server.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
 
 # Add support for advancedMounts
-{{- $advancedMounts := .Values.persistence | default dict }}
-{{- $controller := "server" }}
-{{- $container := "main" }}
-{{- include "common.lib.storage.mounts" (dict "persistence" $advancedMounts "controller" $controller "container" $container "ctx" $ctx) -}}
+{{- include "common.lib.storage.mounts" (dict 
+    "persistence" .Values.persistence
+    "controller" "server"
+    "container" "main"
+    "context" .) -}}
 
 {{- include "bjw-s.common.loader.all" $ctx }}
 {{ end }}
