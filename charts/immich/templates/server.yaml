@@ -46,7 +46,7 @@ serviceMonitor:
 
 probes:
   liveness:
-    enabled: {{ .Values.server.probes.liveness.enabled | default true }}
+    enabled: {{ .Values.controllers.erver.probes.liveness.enabled | default true }}
     custom: true
     spec:
       httpGet:
@@ -57,7 +57,7 @@ probes:
       timeoutSeconds: 1
       failureThreshold: 3
   readiness:
-    enabled: {{ .Values.server.probes.readiness.enabled | default true }}
+    enabled: {{ .Values.controllers.server.probes.readiness.enabled | default true }}
     custom: true
     spec:
       httpGet:
@@ -68,7 +68,7 @@ probes:
       timeoutSeconds: 1
       failureThreshold: 3
   startup:
-    enabled: {{ .Values.server.probes.startup.enabled | default true }}
+    enabled: {{ .Values.controllers.server.probes.startup.enabled | default true }}
     custom: true
     spec:
       httpGet:
