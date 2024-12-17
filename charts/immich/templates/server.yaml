@@ -97,12 +97,20 @@ persistence:
 {{- $_ := get .Values "server" | mergeOverwrite $ctx.Values -}}
 {{- $_ = include "immich.server.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
 
-# Add support for advancedMounts
-{{- include "common.lib.storage.mounts" (dict 
-    "persistence" .Values.persistence
-    "controller" "server"
-    "container" "main"
-    "context" .) -}}
+# Add volumes and mounts manually
+volumes:
+{{- range $name, $config := .Values.persistence }}
+  - name: {{ $name }}
+    persistentVolumeClaim:
+      claimName: {{ $config.existingClaim }}
+{{- end }}
+
+volumeMounts:
+{{- range $name, $config := .Values.persistence }}
+  - name: {{ $name }}
+    mountPath: {{ $config.advancedMounts.server.main.0.path }}
+    readOnly: {{ $config.advancedMounts.server.main.0.readOnly | default false }}
+{{- end }}
 
 {{- include "bjw-s.common.loader.all" $ctx }}
 {{ end }}
