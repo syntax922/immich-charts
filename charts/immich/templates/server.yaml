@@ -85,10 +85,11 @@ persistence:
     type: persistentVolumeClaim
     existingClaim: {{ $config.existingClaim }}
     globalMounts:
-      - path: {{ $config.advancedMounts.server.main.0.path }}
-        readOnly: {{ $config.advancedMounts.server.main.0.readOnly | default false }}
+      {{- range $mount := $config.advancedMounts.server.main }}
+      - path: {{ $mount.path }}
+        readOnly: {{ $mount.readOnly | default false }}
+      {{- end }}
   {{- end }}
-{{- end }}
 {{- end }}
 
 {{ if .Values.server.enabled }}
