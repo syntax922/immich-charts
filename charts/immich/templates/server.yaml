@@ -80,9 +80,11 @@ persistence:
 # Debugging persistence values
 {{- range $name, $config := .Values.persistence }}
   {{- if $config.enabled }}
-  {{- with $config }}
+  {{- if hasKey $config "advancedMounts" }}
   # Debug: Printing advancedMounts configuration for {{ $name }}
-  {{- toYaml .advancedMounts | nindent 2 }}
+  {{- toYaml $config.advancedMounts | nindent 2 }}
+  {{- else }}
+  # Debug: No advancedMounts defined for {{ $name }}
   {{- end }}
   {{- end }}
 {{- end }}
@@ -93,17 +95,19 @@ persistence:
   {{ $name }}:
     enabled: true
     type: persistentVolumeClaim
-    existingClaim: {{ $config.existingClaim }}
-    {{- if $config.advancedMounts }}
-      {{- if $config.advancedMounts.server }}
-        {{- if $config.advancedMounts.server.main }}
+    existingClaim: {{ $config.existingClaim | default "" }}
+    {{- if and (hasKey $config "advancedMounts") (hasKey $config.advancedMounts "server") }}
+      {{- if hasKey $config.advancedMounts.server "main" }}
     globalMounts:
       {{- range $mount := $config.advancedMounts.server.main }}
-      - path: {{ $mount.path }}
+      - path: {{ $mount.path | default "" }}
         readOnly: {{ $mount.readOnly | default false }}
       {{- end }}
-        {{- end }}
+      {{- else }}
+      # Debug: No 'main' key defined in advancedMounts.server for {{ $name }}
       {{- end }}
+    {{- else }}
+    # Debug: No advancedMounts.server defined for {{ $name }}
     {{- end }}
   {{- end }}
 {{- end }}
