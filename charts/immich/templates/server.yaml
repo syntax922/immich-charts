@@ -3,11 +3,11 @@ global:
   nameOverride: server
 
 env:
-  {{ if .Values.immich.metrics.enabled }}
-      IMMICH_TELEMETRY_INCLUDE: all
-  {{ end }}
+  {{- if .Values.immich.metrics.enabled }}
+  IMMICH_TELEMETRY_INCLUDE: all
+  {{- end }}
   {{- if .Values.immich.configuration }}
-      IMMICH_CONFIG_FILE: /config/immich-config.yaml
+  IMMICH_CONFIG_FILE: /config/immich-config.yaml
   {{- end }}
 
 {{- if .Values.immich.configuration }}
@@ -91,10 +91,11 @@ persistence:
       {{- end }}
   {{- end }}
 {{- end }}
+{{- end }} # Close the persistence block here
 
-{{ if .Values.server.enabled }}
+{{- if .Values.server.enabled }}
 {{- $ctx := deepCopy . -}}
 {{- $_ := get .Values "server" | mergeOverwrite $ctx.Values -}}
 {{- $_ = include "immich.server.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
 {{- include "bjw-s.common.loader.all" $ctx }}
-{{ end }}
+{{- end }} # Close the server.enabled block
