@@ -77,6 +77,16 @@ persistence:
     name: {{ .Release.Name }}-immich-config
 {{- end }}
 
+# Debugging persistence values
+{{- range $name, $config := .Values.persistence }}
+  {{- if $config.enabled }}
+  {{- with $config }}
+  # Debug: Printing advancedMounts configuration for {{ $name }}
+  {{- toYaml .advancedMounts | nindent 2 }}
+  {{- end }}
+  {{- end }}
+{{- end }}
+
 # Add a dynamic loop over additional persistence items
 {{- range $name, $config := .Values.persistence }}
   {{- if $config.enabled }}
@@ -85,10 +95,14 @@ persistence:
     type: persistentVolumeClaim
     existingClaim: {{ $config.existingClaim }}
     {{- if $config.advancedMounts }}
+      {{- if $config.advancedMounts.server }}
+        {{- if $config.advancedMounts.server.main }}
     globalMounts:
       {{- range $mount := $config.advancedMounts.server.main }}
       - path: {{ $mount.path }}
         readOnly: {{ $mount.readOnly | default false }}
+      {{- end }}
+        {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}
