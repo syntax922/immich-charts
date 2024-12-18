@@ -93,11 +93,11 @@ persistence:
     {{- end }}
   {{- end }}
 {{- end }}
-
+{{- end }} # End of immich.server.hardcodedValues
 
 {{- if .Values.server.enabled }}
 {{- $ctx := deepCopy . -}}
 {{- $_ := get .Values "server" | mergeOverwrite $ctx.Values -}}
 {{- $_ = include "immich.server.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
 {{- include "bjw-s.common.loader.all" $ctx }}
-{{- end }} # Close the server.enabled block
+{{- end }} # End of server.enabled
