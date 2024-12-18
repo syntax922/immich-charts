@@ -45,8 +45,8 @@ serviceMonitor:
         scheme: http
 
 probes:
-  liveness:
-    enabled: {{ .Values.controllers.server.probes.liveness.enabled | default true }}
+  liveness: &probes
+    enabled: true
     custom: true
     spec:
       httpGet:
@@ -56,19 +56,9 @@ probes:
       periodSeconds: 10
       timeoutSeconds: 1
       failureThreshold: 3
-  readiness:
-    enabled: {{ .Values.controllers.server.probes.readiness.enabled | default true }}
-    custom: true
-    spec:
-      httpGet:
-        path: /api/server/ping
-        port: http
-      initialDelaySeconds: 0
-      periodSeconds: 10
-      timeoutSeconds: 1
-      failureThreshold: 3
+  readiness: *probes
   startup:
-    enabled: {{ .Values.controllers.server.probes.startup.enabled | default true }}
+    enabled: true
     custom: true
     spec:
       httpGet:
@@ -86,34 +76,24 @@ persistence:
     type: configMap
     name: {{ .Release.Name }}-immich-config
 {{- end }}
-  library:
+
+# Add a dynamic loop over additional persistence items
+{{- range $name, $config := .Values.persistence }}
+  {{- if $config.enabled }}
+  {{ $name }}:
     enabled: true
-    mountPath: /usr/src/app/upload
-    existingClaim: {{ .Values.immich.persistence.library.existingClaim }}
+    type: persistentVolumeClaim
+    existingClaim: {{ $config.existingClaim }}
+    globalMounts:
+      - path: {{ $config.advancedMounts.server.main.0.path }}
+        readOnly: {{ $config.advancedMounts.server.main.0.readOnly | default false }}
+  {{- end }}
+{{- end }}
 {{- end }}
 
 {{ if .Values.server.enabled }}
 {{- $ctx := deepCopy . -}}
 {{- $_ := get .Values "server" | mergeOverwrite $ctx.Values -}}
 {{- $_ = include "immich.server.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
-
-# Add volumes manually
-volumes:
-{{- range $name, $config := .Values.persistence }}
-  - name: {{ $name }}
-    persistentVolumeClaim:
-      claimName: {{ $config.existingClaim }}
-{{- end }}
-
-# Add volume mounts manually
-volumeMounts:
-{{- range $name, $config := .Values.persistence }}
-  {{- range $mount := $config.advancedMounts.server.main }}
-  - name: {{ $name }}
-    mountPath: {{ $mount.path }}
-    readOnly: {{ $mount.readOnly | default false }}
-  {{- end }}
-{{- end }}
-
 {{- include "bjw-s.common.loader.all" $ctx }}
 {{ end }}
