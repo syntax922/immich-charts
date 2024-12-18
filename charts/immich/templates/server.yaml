@@ -84,14 +84,16 @@ persistence:
     enabled: true
     type: persistentVolumeClaim
     existingClaim: {{ $config.existingClaim }}
+    {{- if $config.advancedMounts }}
     globalMounts:
       {{- range $mount := $config.advancedMounts.server.main }}
       - path: {{ $mount.path }}
         readOnly: {{ $mount.readOnly | default false }}
       {{- end }}
+    {{- end }}
   {{- end }}
 {{- end }}
-{{- end }} # Close the persistence block here
+
 
 {{- if .Values.server.enabled }}
 {{- $ctx := deepCopy . -}}
