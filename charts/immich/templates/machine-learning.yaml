@@ -43,7 +43,20 @@ probes:
 {{- /* Have to reference with index here because the dash breaks a normal dereference */}}
 {{ if (index .Values "machine-learning").enabled }}
 {{- $ctx := deepCopy . -}}
-{{- $_ := get .Values "machine-learning" | mergeOverwrite $ctx.Values -}}
-{{- $_ = include "immich.machine-learning.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
+
+{{- /* Render the built-in Immich machine-learning default values: */}}
+{{- $hardcodedValuesYaml := include "immich.machine-learning.hardcodedValues" . }}
+{{- $hardcodedValues := fromYaml $hardcodedValuesYaml }}
+
+{{- /* Merge those into $ctx.Values: */}}
+{{- $_ = mergeOverwrite $ctx.Values $hardcodedValues }}
+
+{{- /* If the user set .Values.machine-learning.affinity, stuff it into $ctx.Values.affinity: */}}
+{{- with (index .Values "machine-learning" "affinity") }}
+{{- $_ = set $ctx.Values "affinity" . }}
+{{- end }}
+
+{{- /* Finally, call bjw-s.common.loader.all to build the Deployment, 
+      with our updated $ctx that includes affinity. */}}
 {{- include "bjw-s.common.loader.all" $ctx }}
 {{ end }}
